@@ -5,17 +5,22 @@ const app = express();
 // const firebase = require('firebase')
 
 const FBAuth = require('./utils/fbAuth');
-const { getAllProjects, postProject } = require('./handlers/projects');
-const { getAllPieces, postPiece } = require('./handlers/pieces');
+const { getAllProjects, postProject, getProject } = require('./handlers/projects');
+const { getAllPieces, postPiece, getPiece, uploadPieceImage } = require('./handlers/pieces');
 const { signUp, login, uploadImage } = require('./handlers/users');
 
 //project routes
 app.get('/projects', getAllProjects);
 app.post('/project', FBAuth, postProject);
+app.get('/project/:projectId', getProject);
+//TODO delete project
 
 //pieces routes
 app.get('/pieces', getAllPieces);
 app.post('/piece', FBAuth, postPiece);
+// app.get('/piece/:pieceId', getPiece);
+// app.post('/piece/:pieceId/image', uploadPieceImage);
+//TODO delete piece
 
 //users routes
 app.post('/signup', signUp);

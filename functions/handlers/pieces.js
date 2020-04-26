@@ -21,8 +21,9 @@ exports.getAllPieces = (req, res) => {
 exports.postPiece = (req, res) => {
     const newPiece = {
         pieceName: req.body.pieceName,
-        Astronomy: req.body.Astronomy,
-        description: req.body.description
+        description: req.body.description,
+        projectId: req.body.projectId
+        // pieceImageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
     }
 
     db
@@ -35,4 +36,80 @@ exports.postPiece = (req, res) => {
             res.status(500).json({ error: 'something went wrong.' })
             console.error(err);
         })
+}
+
+// exports.getPiece = (req, res) => {
+//     let pieceData = {};
+//     db.doc(`/pieces/${req.params.pieceId}`)
+//         .get()
+//         .then((doc) => {
+//             if (!doc.exists) {
+//                 return res.status(404).json({ error: 'Piece not found' });
+//             }
+//             pieceData = doc.data();
+//             pieceData.pieceId = doc.id;
+//             return db
+//                 .collection('comments')
+//                 .orderBy('createdAt', 'desc')
+//                 .where('pieceId', '==', req.params.pieceId)
+//                 .get()
+//         })
+//         .then((data) => {
+//             console.log(data);
+//             pieceData.comments = [];
+//             data.forEach((doc) => {
+//                 pieceData.comments.push(doc.data());
+//             });
+//             return res.json(pieceData);
+//         })
+//         .catch(err => {
+//             console.error(err);
+//             res.status(500).json({ error: err.code });
+//         });
+// };
+
+exports.uploadPieceImage = (req, res) => {
+    const BusBoy = require('busboy');
+    const path = require('path');
+    const os = require('os');
+    const fs = require('fs');
+
+    const busboy = new BusBoy({ headers: req.headers });
+
+    let imageFileName;
+    let imageToBeUploaded = {};
+
+    busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
+        if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
+            return res.status(400).json({ error: 'Wrong file type submitted' });
+        }
+
+        const imageExtension = filename.split('.')[filename.split('.').length - 1];
+        imageFileName = `${Math.round(Math.random() * 100000)}.${imageExtension}`;
+        const filepath = path.join(os.tmpdir(), imageFileName);
+        imageToBeUploaded = { filepath, mimetype };
+        file.pipe(fs.createWriteStream(filepath));
+    })
+    busboy.on('finish', () => {
+        admin.storage().bucket(config.storageBucket).upload(imageToBeUploaded.filepath, {
+            resumable: false,
+            metadata: {
+                metadata: {
+                    contentType: imageToBeUploaded.mimetype
+                }
+            }
+        })
+            .then(() => {
+                const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
+                return db.doc(`/pieces/${req.doc.id}`).update({ pieceImageUrl: imageUrl });
+            })
+            .then(() => {
+                return res.json({ message: 'Piece Image uploaded successfully' });
+            })
+            .catch(err => {
+                console.error(err)
+                return res.status(500).json({ error: err.code });
+            })
+    })
+    busboy.end(req.rawBody);
 }
