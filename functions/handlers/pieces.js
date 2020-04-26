@@ -25,7 +25,8 @@ exports.postPiece = (req, res) => {
     const newPiece = {
         pieceName: req.body.pieceName,
         description: req.body.description,
-        projectId: req.body.projectId
+        projectId: req.body.projectId,
+        userHandle: req.user.handle
         // pieceImageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
     }
 
@@ -115,4 +116,26 @@ exports.uploadPieceImage = (req, res) => {
             })
     })
     busboy.end(req.rawBody);
+}
+
+exports.deletePiece = (req, res) => {
+    const document = db.doc(`/pieces/${req.params.pieceId}`);
+    document.get()
+        .then(doc => {
+            if (!doc.exists) {
+                return res.status(404).json({ error: 'Piece not found' });
+            }
+            if (doc.data().userHandle !== req.user.handle) {
+                return res.status(403).json({ error: 'Unauthorized' });
+            } else {
+                return document.delete();
+            }
+        })
+        .then(() => {
+            res.json({ message: 'Piece deleted successfully' });
+        })
+        .catch(err => {
+            console.error(err);
+            return res.status(500).json({ error: err.code });
+        })
 }
