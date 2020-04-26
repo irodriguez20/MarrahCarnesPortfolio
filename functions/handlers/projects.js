@@ -22,6 +22,7 @@ exports.postProject = (req, res) => {
     const newProject = {
         projectName: req.body.projectName,
         projectDescription: req.body.projectDescription,
+        userHandle: req.user.handle
     }
 
     db
@@ -63,3 +64,25 @@ exports.getProject = (req, res) => {
             res.status(500).json({ error: err.code });
         });
 };
+
+exports.deleteProject = (req, res) => {
+    const document = db.doc(`/projects/${req.params.projectId}`);
+    document.get()
+        .then(doc => {
+            if (!doc.exists) {
+                return res.status(404).json({ error: 'Project not found' });
+            }
+            if (doc.data().userHandle !== req.user.handle) {
+                return res.status(403).json({ error: 'Unauthorized' });
+            } else {
+                return document.delete();
+            }
+        })
+        .then(() => {
+            res.json({ message: 'Project deleted successfully' });
+        })
+        .catch(err => {
+            console.error(err);
+            return res.status(500).json({ error: err.code });
+        })
+}
