@@ -1,4 +1,7 @@
-const { db } = require('../utils/admin');
+const { admin, db } = require('../utils/admin');
+
+const config = require('../utils/config');
+
 
 exports.getAllPieces = (req, res) => {
     db
@@ -101,7 +104,7 @@ exports.uploadPieceImage = (req, res) => {
         })
             .then(() => {
                 const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`
-                return db.doc(`/pieces/${req.doc.id}`).update({ pieceImageUrl: imageUrl });
+                return db.doc(`/pieces/${req.params.pieceId}`).update({ pieceImageUrl: imageUrl });
             })
             .then(() => {
                 return res.json({ message: 'Piece Image uploaded successfully' });

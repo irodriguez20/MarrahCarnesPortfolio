@@ -46,14 +46,12 @@ exports.getProject = (req, res) => {
             }
             projectData = doc.data();
             projectData.projectId = doc.id;
-            console.log(projectData);
             return db
                 .collection('pieces')
                 .where('projectId', '==', projectData.projectId)
                 .get()
         })
         .then((data) => {
-            console.log(data);
             projectData.pieces = [];
             data.forEach((doc) => {
                 projectData.pieces.push(doc.data());

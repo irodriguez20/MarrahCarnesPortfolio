@@ -18,7 +18,7 @@ app.get('/project/:projectId', getProject);
 //pieces routes
 app.get('/pieces', getAllPieces);
 app.post('/piece', FBAuth, postPiece);
-// app.get('/piece/:pieceId', getPiece);
+app.post('/piece/:pieceId', FBAuth, uploadPieceImage);
 // app.post('/piece/:pieceId/image', uploadPieceImage);
 //TODO delete piece
 
