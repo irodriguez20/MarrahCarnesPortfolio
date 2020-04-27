@@ -29,3 +29,20 @@ app.post('/signup', signUp);
 app.post('/login', login);
 app.post('/user/image', FBAuth, uploadImage);
 exports.api = functions.region('us-central1').https.onRequest(app);
+
+exports.onProjectDelete = functions
+    .region('us-central1')
+    .firestore.document('/projects/{projectId}')
+    .onDelete((snapshot, context) => {
+        const projectId = context.params.projectId;
+        const batch = db.batch();
+        return db.collection('pieces').where('projectId', '==', projectId)
+            .get()
+            .then(data => {
+                data.forEach(doc => {
+                    batch.delete(db.doc(`/pieces/${doc.id}`));
+                })
+                return batch.commit();
+            })
+            .catch((err) => console.error(err));
+    })

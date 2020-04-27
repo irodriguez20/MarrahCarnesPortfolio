@@ -37,7 +37,7 @@ exports.postPiece = (req, res) => {
             res.json({ message: `document ${doc.id} created succesfully` })
         })
         .catch(err => {
-            res.status(500).json({ error: 'something went wrong.' })
+            res.status(500).json({ general: 'Something went wrong. Please try again' })
             console.error(err);
         })
 }
@@ -112,7 +112,7 @@ exports.uploadPieceImage = (req, res) => {
             })
             .catch(err => {
                 console.error(err)
-                return res.status(500).json({ error: err.code });
+                return res.status(500).json({ general: 'Something went wrong. Please try again' });
             })
     })
     busboy.end(req.rawBody);
@@ -136,6 +136,6 @@ exports.deletePiece = (req, res) => {
         })
         .catch(err => {
             console.error(err);
-            return res.status(500).json({ error: err.code });
+            return res.status(500).json({ general: 'Something went wrong. Please try again' });
         })
 }

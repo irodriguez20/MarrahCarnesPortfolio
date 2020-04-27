@@ -32,7 +32,7 @@ exports.postProject = (req, res) => {
             res.json({ message: `document ${doc.id} created succesfully` })
         })
         .catch(err => {
-            res.status(500).json({ error: 'something went wrong.' })
+            res.status(500).json({ general: 'something went wrong.' })
             console.error(err);
         })
 }
@@ -61,7 +61,7 @@ exports.getProject = (req, res) => {
         })
         .catch(err => {
             console.error(err);
-            res.status(500).json({ error: err.code });
+            res.status(500).json({ general: 'Something went wrong. Please try again' });
         });
 };
 
@@ -83,6 +83,6 @@ exports.deleteProject = (req, res) => {
         })
         .catch(err => {
             console.error(err);
-            return res.status(500).json({ error: err.code });
+            return res.status(500).json({ general: 'Something went wrong. Please try again' });
         })
 }
